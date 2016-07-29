@@ -3,7 +3,7 @@
 
 def probability_distribution(n):
     """
-    initial distribution
+    initial distribution (equal, add up to 1)
     :param n:   size of vector
     :return:    probability distribution
     """
@@ -44,7 +44,7 @@ def posterior_distribution(p, w, Z, p_hit, p_miss):
     return post_d
 
 w = ['green', 'red', 'red', 'green', 'green']  # world, green = door, red = wall
-prob_d = probability_distribution(5)  # probability distribution, equal probability (add up to 1)
+prob_d = probability_distribution(5)  # vector size = 5
 print(prob_d)  # p(X_i)
 
 Z = 'red'  # sensed value (measurement)
