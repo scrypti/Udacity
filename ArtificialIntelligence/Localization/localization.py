@@ -1,9 +1,10 @@
 # https://classroom.udacity.com/courses/cs373/lessons/48739381/concepts/487350240923#
+import matplotlib.pyplot as plt
 
 
-def probability_distribution(n):
+def uniform(n):
     """
-    initial distribution (equal, add up to 1)
+    initial uniform distribution (equal, add up to 1)
     :param n:   size of vector
     :return:    probability distribution
     """
@@ -16,16 +17,15 @@ def probability_distribution(n):
     return prob_d
 
 
-def posterior_distribution(p, w, Z, p_hit, p_miss):
+def sense(p, w, Z, p_hit, p_miss):
     """
-    measurement update (sense)
-    adjust probability of p with regard to Z
-    :param p:       places
+    recalculates probability distribution based on sensed value
+    :param p:       probability distribution
     :param w:       world
     :param Z:       measurement
     :param p_hit    probability change for hit
     :param p_miss   probability change for miss
-    :return:        normalized posterior distribution
+    :return:  posterior distribution
     """
 
     # we have sensed z, probability increases by p_hit if equal
@@ -43,10 +43,36 @@ def posterior_distribution(p, w, Z, p_hit, p_miss):
 
     return post_d
 
-w = ['green', 'red', 'red', 'green', 'green']  # world, green = door, red = wall
-prob_d = probability_distribution(5)  # vector size = 5
-print(prob_d)  # p(X_i)
 
-Z = 'red'  # sensed value (measurement)
-post_d = posterior_distribution(prob_d, w, Z, 0.6, 0.2)  # p_hit = 0.6, p_miss = 0.2 (arbitrary values)
-print(post_d)  # p(X_i | Z)
+def move(p, U):
+    """
+    move robot by U steps
+    :param p:   probability distribution
+    :param U:   number of steps
+    :return:    posterior distribution
+    """
+
+    q = []
+    for i in range(len(p)):
+        q.append(p[(i - U) % len(p)])
+    return q
+
+# initialize system
+w = ['red', 'blue', 'red', 'blue', 'red', 'red', 'red', 'red', 'blue', 'red', 'red']  # world, blue = door, red = wall
+p = uniform(len(w))  # vector size
+print(p)  # p(X_i)
+plt.plot(p)
+
+# sense environment
+Z = 'blue'  # sensed value (measurement)
+p = sense(p, w, Z, 0.6, 0.2)  # p_hit = 0.6, p_miss = 0.2 (arbitrary values)
+print(p)  # p(X_i | Z)
+plt.plot(p)
+
+# move
+U = 1  # step size
+p = move(p, U, True)
+print(p)
+plt.plot(p)
+
+plt.show()

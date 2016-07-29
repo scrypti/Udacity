@@ -64,7 +64,7 @@ def move(p, U, p_over, p_under):
         q.append(s)  # p(X_i) = p_exact * p(X_i - U) + p_over * p(X_i - U - 1) + p_under * p(X_i - U + 1)
     return q
 
-# initialize syste
+# initialize system
 world = ['green', 'red', 'red', 'green', 'green']  # world, green = door, red = wall
 measurements = ['red', 'green']
 motions = [1, 1]
@@ -76,9 +76,14 @@ p = uniform(len(world))
 # print(p)  # p(X_i | Z)
 
 # move
-U = 1  # step size
-p = move(p, U, 0.1, 0.1)
-print(p)
+# U = 1  # step size
+# p = move(p, U, 0.1, 0.1)
+# print(p)
 
+# sense and move multiple times
 for i in range(len(measurements)):
-    
+    print(p)
+    p = sense(p, world, measurements[i], 0.6, 0.2)
+    p = move(p, motions[i], 0.1, 0.1)
+    print(p)
+
