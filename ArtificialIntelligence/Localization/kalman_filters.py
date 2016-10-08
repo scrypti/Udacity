@@ -1,9 +1,10 @@
 from math import *
 import warnings
 
+# make predictions about future positions
+
 # measurement meant updating our belief (and renormalizing our distribution).
 # motion meant keeping track of where all of our probability "went" when we moved
-# (which meant using the law of Total Probability)
 
 # Kalman Filter:
 # measurement update: bayes rule (multiplication)
@@ -13,8 +14,12 @@ import warnings
 def f(m, v, x):
     """
     gaussian computation (deprecated)
+    :param m: mean (mu)
+    :param v: variance (sigma squared)
+    :param x: x
     """
-    return 1 / sqrt(2.0 * pi * v) * exp(-0.5 * (x - m) ** 2 / v)
+
+    return 1 / sqrt(2.0 * pi * v) * exp(-0.5 * (x - m)**2 / v)
 
 
 def update(m1, v1, m2, v2):
@@ -28,8 +33,8 @@ def update(m1, v1, m2, v2):
     :return: new mean and variance [m, v]
     """
 
-    m = (v2 * m1 + v1 * m2) / (v1 + v2)
-    v = 1.0 / (1.0 / v1 + 1.0 / v2)
+    m = (v1 * m2 + v2 * m1) / (v1 + v2)
+    v = 1. / (1. / v1 + 1. / v2)
     return [m, v]
 
 
@@ -47,18 +52,25 @@ def predict(m1, v1, m2, v2):
     v = v1 + v2
     return [m, v]
 
-measurements = [5., 6., 7., 9., 10.]
-motion = [1., 1., 2., 1., 1.]
-measurement_sig = 4.
-motion_sig = 2.
-mu = 0.
-sig = 10000.
 
-# print(update(10, 8, 13, 2))
-# print(predict(10, 4, 12, 4))
+def main():
+    measurements = [5., 6., 7., 9., 10.]
+    motion = [1., 1., 2., 1., 1.]
+    measurement_sig = 4.
+    motion_sig = 2.
+    mu = 0.
+    sig = 10000.
 
-for i in range(len(measurements)):
-    [mu, sig] = update(mu, sig, measurements[i], measurement_sig)
-    print('update:  ', [mu, sig])
-    [mu, sig] = predict(mu, sig, motion[i], motion_sig)
-    print('predict: ', [mu, sig])
+    result = [mu, sig]
+    for i in range(len(measurements)):
+        # sense
+        result = update(result[0], result[1], measurements[i], measurement_sig)
+        print('update:  ', result)
+        # move
+        result = predict(result[0], result[1], motion[i], motion_sig)
+        print('predict: ', result)
+
+    # print(update(10, 4, 12, 4))
+
+if __name__ == "__main__":
+    main()
