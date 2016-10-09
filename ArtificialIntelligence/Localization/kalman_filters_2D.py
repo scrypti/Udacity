@@ -14,7 +14,7 @@ class matrix:
     def zero(self, dimx, dimy):
         # check if valid dimensions
         if dimx < 1 or dimy < 1:
-            raise ValueError("Invalid size of matrix")
+            raise(ValueError, "Invalid size of matrix")
         else:
             self.dimx = dimx
             self.dimy = dimy
@@ -23,7 +23,7 @@ class matrix:
     def identity(self, dim):
         # check if valid dimension
         if dim < 1:
-            raise ValueError("Invalid size of matrix")
+            raise(ValueError, "Invalid size of matrix")
         else:
             self.dimx = dim
             self.dimy = dim
@@ -33,12 +33,15 @@ class matrix:
 
     def show(self):
         for i in range(self.dimx):
-            print(self.value[i], ' ')
+            print
+            self.value[i]
+        print
+        ' '
 
     def __add__(self, other):
         # check if correct dimensions
         if self.dimx != other.dimx or self.dimy != other.dimy:
-            raise ValueError("Matrices must be of equal dimensions to add")
+            raise(ValueError, "Matrices must be of equal dimensions to add")
         else:
             # add if correct dimensions
             res = matrix([[]])
@@ -51,7 +54,7 @@ class matrix:
     def __sub__(self, other):
         # check if correct dimensions
         if self.dimx != other.dimx or self.dimy != other.dimy:
-            raise ValueError("Matrices must be of equal dimensions to subtract")
+            raise(ValueError, "Matrices must be of equal dimensions to subtract")
         else:
             # subtract if correct dimensions
             res = matrix([[]])
@@ -64,7 +67,7 @@ class matrix:
     def __mul__(self, other):
         # check if correct dimensions
         if self.dimy != other.dimx:
-            raise ValueError("Matrices must be m*n and n*p to multiply")
+            raise(ValueError, "Matrices must be m*n and n*p to multiply")
         else:
             # subtract if correct dimensions
             res = matrix([[]])
@@ -99,7 +102,7 @@ class matrix:
                 res.value[i][i] = 0.0
             else:
                 if d < 0.0:
-                    raise ValueError("Matrix not positive-definite")
+                    raise(ValueError, "Matrix not positive-definite")
                 res.value[i][i] = sqrt(d)
             for j in range(i + 1, self.dimx):
                 S = sum([res.value[k][i] * res.value[k][j] for k in range(self.dimx)])
@@ -135,50 +138,49 @@ class matrix:
 
 ########################################
 
-def kalman_filter(m, x, P):
+def kalman_filter(m, x, P, dt):
     """
-    reference: Udacity - Kalman Filter Design
+    reference: Udacity - Problem Set 2
     :param m: measurements
     :param x: initial state (location and velocity)
     :param P: initial uncertainty
+    :param dt: timestep
     :return:
     """
 
-    u = matrix([[0.], [0.]])            # external motion (motion vector) (ignore)
-    F = matrix([[1., 1.], [0, 1.]])     # next state function (state transition matrix)
-    H = matrix([[1., 0.]])              # measurement function (measurement transition matrix)
-    R = matrix([[1.]])                  # measurement uncertainty (noise) (ignore)
-    I = matrix([[1., 0.], [0., 1.]])    # identity matrix
+    u = matrix([[0.], [0.], [0.], [0.]])                                    # external motion (allows input)
+    F = matrix([[1, 0, dt, 0], [0, 1, 0, dt], [0, 0, 1, 0], [0, 0, 0, 1]])  # next state function
+    H = matrix([[1, 0, 0, 0], [0, 1, 0, 0]])                                # measurement function
+    R = matrix([[0.1, 0], [0, 0.1]])                                        # measurement uncertainty (noise)
+    I = matrix([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])    # identity matrix
 
     for n in range(len(m)):
-        # measurement update
-        Z = matrix([[m[n]]])                 # measurement matrix
-        y = Z - H * x                        # error calculation
-        S = H * P * H.transpose() + R        #
-        K = P * H.transpose() * S.inverse()  # kalman gain
-        x = x + K * y                        # next prediction
-        P = (I - K * H) * P                  # measurement update
+        # prediction
+        x = (F * x) + u
+        P = F * P * F.transpose()
 
-        # motion prediction
-        x = F * x + u                        # estimated state
-        P = F * P * F.transpose()            # estimated uncertainty
+        # measurement update
+        Z = matrix([m[n]])
+        y = Z.transpose() - (H * x)
+        S = H * P * H.transpose() + R
+        K = P * H.transpose() * S.inverse()
+        x = x + (K * y)
+        P = (I - (K * H)) * P
 
     return x, P
 
 
 def main():
-    measurements = [1, 2, 3]
-    x = matrix([[0.], [0.]])                # initial state (location and velocity)
-    P = matrix([[1000., 0.], [0., 1000.]])  # initial uncertainty (high uncertainty in location and velocity)
+    dt = 0.1  # timestep
 
-    [x, P] = kalman_filter(measurements, x, P)
+    measurements = [[5., 10.], [6., 8.], [7., 6.], [8., 4.], [9., 2.], [10., 0.]]
+    x = matrix([[4.], [12.], [0.], [0.]])                                       # initial state (location and velocity)
+    P = matrix([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 1000, 0], [0, 0, 0, 1000]])  # initial uncertainty
+
+    [x, P] = kalman_filter(measurements, x, P, dt)
 
     print('x: ', x)
     print('P: ', P)
-
-    # output should be:
-    # x: [[3.9996664447958645], [0.9999998335552873]]
-    # P: [[2.3318904241194827, 0.9991676099921091], [0.9991676099921067, 0.49950058263974184]]
 
 if __name__ == "__main__":
     main()

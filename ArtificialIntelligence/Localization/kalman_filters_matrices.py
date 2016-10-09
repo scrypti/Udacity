@@ -138,44 +138,51 @@ class matrix:
 
 ########################################
 
-def kalman_filter(x, P):
+def kalman_filter(m, x, P):
     """
     reference: Udacity - Kalman Filter Design
-    :param x:
-    :param P:
+    :param m: measurements
+    :param x: initial state (location and velocity)
+    :param P: initial uncertainty
     :return:
     """
-    for n in range(len(measurements)):
-        # measurement update
-        Z = matrix([[measurements[n]]])      # measurement matrix
-        y = Z - (H * x)                      #
-        S = H * P * H.transpose() + R        # error calculation
-        K = P * H.transpose() * S.inverse()  # kalman gain
-        x = x + (K * y)                      # next prediction
-        P = (I - (K * H)) * P                # measurement update
 
-        # prediction
-        x = (F * x) + u                      # estimated state
+    u = matrix([[0.], [0.]])            # external motion (motion vector) (ignore)
+    F = matrix([[1., 1.], [0, 1.]])     # next state function (state transition matrix)
+    H = matrix([[1., 0.]])              # measurement function (measurement transition matrix)
+    R = matrix([[1.]])                  # measurement uncertainty (noise) (ignore)
+    I = matrix([[1., 0.], [0., 1.]])    # identity matrix
+
+    for n in range(len(m)):
+        # measurement update
+        Z = matrix([[m[n]]])                 # measurement matrix
+        y = Z - H * x                        # error calculation
+        S = H * P * H.transpose() + R        #
+        K = P * H.transpose() * S.inverse()  # kalman gain
+        x = x + K * y                        # next prediction
+        P = (I - K * H) * P                  # measurement update
+
+        # motion prediction
+        x = F * x + u                        # estimated state
         P = F * P * F.transpose()            # estimated uncertainty
 
     return x, P
 
 
-############################################
-### use the code below to test your filter!
-############################################
+def main():
+    measurements = [1, 2, 3]
+    x = matrix([[0.], [0.]])                # initial state (location and velocity)
+    P = matrix([[1000., 0.], [0., 1000.]])  # initial uncertainty (high uncertainty in location and velocity)
 
-measurements = [1, 2, 3]
+    [x, P] = kalman_filter(measurements, x, P)
 
-x = matrix([[0.], [0.]])  # initial state (location and velocity)
-P = matrix([[1000., 0.], [0., 1000.]])  # initial uncertainty
-u = matrix([[0.], [0.]])  # external motion
-F = matrix([[1., 1.], [0, 1.]])  # next state function
-H = matrix([[1., 0.]])  # measurement function
-R = matrix([[1.]])  # measurement uncertainty
-I = matrix([[1., 0.], [0., 1.]])  # identity matrix
+    print('x: ', x)
+    print('P: ', P)
 
-print(kalman_filter(x, P))
-# output should be:
-# x: [[3.9996664447958645], [0.9999998335552873]]
-# P: [[2.3318904241194827, 0.9991676099921091], [0.9991676099921067, 0.49950058263974184]]
+    # output should be:
+    # x: [[3.9996664447958645], [0.9999998335552873]]
+    # P: [[2.3318904241194827, 0.9991676099921091], [0.9991676099921067, 0.49950058263974184]]
+
+if __name__ == "__main__":
+    main()
+
