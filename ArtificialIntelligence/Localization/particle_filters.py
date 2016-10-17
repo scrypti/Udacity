@@ -90,11 +90,12 @@ def eval(r, p):
         sum += err
     return sum / float(len(p))
 
-
 # the larger the weight of the particle, the more important it is
 # the probability of survival is proportional to the particle weight, heavy particles are more likely to survive
 
+
 def particle_init(n):
+    # places particles randomly
     p2 = []
     for i in range(n):
         r = robot()
@@ -104,6 +105,7 @@ def particle_init(n):
 
 
 def particle_move(p, Z, turn, forward):
+    # moves particles and collects measurement data
     w2 = []
     for i in range(len(p)):
         p[i] = p[i].move(turn, forward)
@@ -112,6 +114,7 @@ def particle_move(p, Z, turn, forward):
 
 
 def particle_resample(p, w):
+    # selects 1000 particles out of the current list of particles, particle weight normalized into probability
     p2 = []
     normalizer = sum(w)
 
@@ -130,35 +133,28 @@ def particle_resample(p, w):
     return p2
 
 
-def plot_init():
-    plt.axis([0, 100, 0, 100])
-
-
-def plot_landmarks():
-    plt.plot([20, 80, 20, 80], [20, 80, 80, 20], 'ko')
-
-
-def plot_robot(r):
-    if isinstance(r, robot):
-        plt.plot([r.x], [r.y], 'bo')
-
-
-def plot_particles(p):
-    x = []
-    y = []
-    for i in range(len(p)):
-        particle = p[i]
-        if isinstance(particle, robot):
-            x.append(particle.x)
-            y.append(particle.y)
-    plt.plot(x, y, 'ro')
-
-
 def plot(p, r):
-    plot_init()
+    def plot_landmarks():
+        plt.plot([20, 80, 20, 80], [20, 80, 80, 20], 'ko')
+
+    def plot_robot(r):
+        if isinstance(r, robot):
+            plt.plot([r.x], [r.y], 'bo')
+
+    def plot_particles(p):
+        x = []
+        y = []
+        for i in range(len(p)):
+            particle = p[i]
+            if isinstance(particle, robot):
+                x.append(particle.x)
+                y.append(particle.y)
+        plt.plot(x, y, 'ro')
+
     plot_particles(p)
     plot_robot(r)
     plot_landmarks()
+    plt.axis([0, 100, 0, 100])
     plt.show()
 
 myrobot = robot()
@@ -178,8 +174,4 @@ for i in range(30):
 
     print('particle error: ', eval(myrobot, p))
     plot(p, myrobot)
-
 # print(p)
-
-
-
